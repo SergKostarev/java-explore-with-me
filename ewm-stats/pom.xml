@@ -13,7 +13,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>ewm-stats-dto</module>
-        <module>ems-stats-client</module>
+        <module>ewm-stats-client</module>
         <module>ewm-stats-serv</module>
     </modules>
 
