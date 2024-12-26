@@ -39,7 +39,7 @@ public class StatsClient {
         rest.exchange("/hit", HttpMethod.POST, requestEntity, Object.class);
     }
 
-    public List<ViewStats> getHits(String start, String end, String[] uris, boolean unique) throws RestClientResponseException {
+    public List<ViewStats> getStats(String start, String end, String[] uris, boolean unique) throws RestClientResponseException {
         Map<String, Object> parameters = Map.of(
                 "start", start,
                 "end", end,

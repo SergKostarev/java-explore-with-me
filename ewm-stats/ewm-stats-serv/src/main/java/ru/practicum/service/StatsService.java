@@ -30,18 +30,8 @@ public class StatsService {
     }
 
     public List<ViewStats> get(String start, String end, String[] uris, boolean unique) {
-        LocalDateTime startDate;
-        try {
-            startDate = convertDate(start);
-        } catch (DateTimeParseException e) {
-            throw new IncorrectDataException("Неверный формат даты", start);
-        }
-        LocalDateTime endDate;
-        try {
-            endDate = convertDate(end);
-        } catch (DateTimeParseException e) {
-            throw new IncorrectDataException("Неверный формат даты", end);
-        }
+        LocalDateTime startDate = convertDate(start);
+        LocalDateTime endDate = convertDate(end);
         if (endDate.isBefore(startDate)) {
             throw new IncorrectDataException("Дата окончания не должна быть раньше начала периода", end);
         }
@@ -78,7 +68,11 @@ public class StatsService {
     }
 
     private LocalDateTime convertDate(String stringDate) throws DateTimeParseException {
-        return LocalDateTime.parse(stringDate, formatter);
+        try {
+            return LocalDateTime.parse(stringDate, formatter);
+        } catch (DateTimeParseException e) {
+            throw new IncorrectDataException("Неверный формат даты", stringDate);
+        }
     }
 
     private long getDistinctIpCount(List<EndpointHitEntity> hits) {
