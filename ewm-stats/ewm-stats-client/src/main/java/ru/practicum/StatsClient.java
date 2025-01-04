@@ -48,7 +48,8 @@ public class StatsClient {
         );
         HttpEntity requestEntity = new HttpEntity<>(null, defaultHeaders());
         return rest
-                .exchange("/stats", HttpMethod.GET, requestEntity, new ParameterizedTypeReference<List<ViewStats>>(){}, parameters)
+                .exchange("/stats?start={start}&end={end}&uris={uris}&unique={unique}",
+                        HttpMethod.GET, requestEntity, new ParameterizedTypeReference<List<ViewStats>>(){}, parameters)
                 .getBody();
     }
 }

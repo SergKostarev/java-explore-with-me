@@ -22,8 +22,8 @@ public class StatsController {
     }
 
     @GetMapping(path = "/stats")
-    public List<ViewStats> getStats(@RequestParam() String start,
-                                   @RequestParam() String end,
+    public List<ViewStats> getStats(@RequestParam String start,
+                                   @RequestParam String end,
                                    @RequestParam(required = false) String[] uris,
                                    @RequestParam(defaultValue = "false") boolean unique) {
         return statsService.get(start, end, uris, unique);

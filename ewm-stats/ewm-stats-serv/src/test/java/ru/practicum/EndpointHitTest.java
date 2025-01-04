@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
+import utils.DateUtils;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,12 +20,10 @@ public class EndpointHitTest {
 
     @Test
     public void testEndpointHit() throws Exception {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime time = LocalDateTime.now();
         EndpointHit endpointHit = new EndpointHit(
                 "192.163.0.1",
                 "/events/1",
-                time.format(formatter));
+                DateUtils.convertToString(LocalDateTime.now()));
         JsonContent<EndpointHit> result = json.write(endpointHit);
         assertThat(result).extractingJsonPathStringValue("$.app").isEqualTo(endpointHit.getApp());
         assertThat(result).extractingJsonPathStringValue("$.uri").isEqualTo(endpointHit.getUri());

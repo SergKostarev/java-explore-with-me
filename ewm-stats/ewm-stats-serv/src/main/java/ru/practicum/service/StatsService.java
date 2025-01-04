@@ -2,17 +2,16 @@ package ru.practicum.service;
 
 import dto.EndpointHit;
 import dto.ViewStats;
+import exception.IncorrectDateException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dao.StatsRepository;
-import ru.practicum.handler.IncorrectDataException;
 import ru.practicum.mapper.StatsMapper;
 import ru.practicum.model.EndpointHitEntity;
+import utils.DateUtils;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 public class StatsService {
 
     private final StatsRepository statsRepository;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Transactional
     public void create(EndpointHit hit) {
@@ -30,16 +28,16 @@ public class StatsService {
     }
 
     public List<ViewStats> get(String start, String end, String[] uris, boolean unique) {
-        LocalDateTime startDate = convertDate(start);
-        LocalDateTime endDate = convertDate(end);
+        LocalDateTime startDate = DateUtils.convertToDate(start);
+        LocalDateTime endDate = DateUtils.convertToDate(end);
         if (endDate.isBefore(startDate)) {
-            throw new IncorrectDataException("Дата окончания не должна быть раньше начала периода", end);
+            throw new IncorrectDateException("Дата окончания не должна быть раньше начала периода", end);
         }
         List<ViewStats> vsList = new ArrayList<>();
         List<EndpointHitEntity> hitsList;
         if (uris == null || uris.length == 0) {
             hitsList = statsRepository
-                    .findByTimestampIsAfterAndTimestampIsBefore(startDate, endDate);
+                    .findByTimestampIsGreaterThanEqualAndTimestampIsLessThanEqual(startDate, endDate);
             Map<String, List<EndpointHitEntity>> hits = hitsList
                     .stream()
                     .collect(Collectors.groupingBy(EndpointHitEntity::getUri));
@@ -49,7 +47,7 @@ public class StatsService {
             }
         } else {
             hitsList = statsRepository
-                    .findByTimestampIsAfterAndTimestampIsBeforeAndUriIn(startDate, endDate, uris);
+                    .findByTimestampIsGreaterThanEqualAndTimestampIsLessThanEqualAndUriIn(startDate, endDate, uris);
             Map<String, List<EndpointHitEntity>> hits = hitsList
                     .stream()
                     .collect(Collectors.groupingBy(EndpointHitEntity::getUri));
@@ -65,14 +63,6 @@ public class StatsService {
         }
         Collections.sort(vsList, Comparator.comparingLong(ViewStats::getHits).reversed());
         return vsList;
-    }
-
-    private LocalDateTime convertDate(String stringDate) throws DateTimeParseException {
-        try {
-            return LocalDateTime.parse(stringDate, formatter);
-        } catch (DateTimeParseException e) {
-            throw new IncorrectDataException("Неверный формат даты", stringDate);
-        }
     }
 
     private long getDistinctIpCount(List<EndpointHitEntity> hits) {
