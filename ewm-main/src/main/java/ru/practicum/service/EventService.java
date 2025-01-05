@@ -74,19 +74,13 @@ public class EventService {
         return getEventShortDto(events);
     }
 
-    public List<EventShortDto> getEventShortDto(List<Event> events) {
-        List<Long> eventIds = events
-                .stream()
-                .map(Event::getId)
-                .toList();
-        Map<Long, Long> requestCount = requestService
-                .getConfirmedRequestsCount(eventIds)
-                .stream()
-                .collect(Collectors.toMap(RequestCountByEvent::getEventId, RequestCountByEvent::getCount));
+    public List<EventShortDto> getEventShortDto(Collection<Event> events) {
+        Map<Long, Long> viewsMap = getViewsMap(events);
+        Map<Long, Long> requestCountMap = getConfirmedRequestCountMap(events);
         return events.stream()
                 .map(e -> EventMapper.toEventShortDto(e,
-                        requestCount.getOrDefault(e.getId(), 0L),
-                        getViews(e)))
+                        requestCountMap.getOrDefault(e.getId(), 0L),
+                        viewsMap.getOrDefault(e.getId(), 0L)))
                 .toList();
     }
 
@@ -397,7 +391,10 @@ public class EventService {
         return spec;
     }
 
-    private Map<Long, Long> getViewsMap(List<Event> events) {
+    private Map<Long, Long> getViewsMap(Collection<Event> events) {
+        if (events.isEmpty()) {
+            return Map.of();
+        }
         LocalDateTime minDate = events
                 .stream()
                 .map(Event::getCreatedOn)
@@ -414,7 +411,7 @@ public class EventService {
                 }, ViewStats::getHits));
     }
 
-    private Map<Long, Long> getConfirmedRequestCountMap(List<Event> events) {
+    private Map<Long, Long> getConfirmedRequestCountMap(Collection<Event> events) {
         List<Long> eventIds = events
                 .stream()
                 .map(Event::getId)

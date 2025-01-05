@@ -79,7 +79,8 @@ public class CompilationService {
                     .distinct()
                     .toList();
             List<Event> events = eventService.getByIds(newEventIds);
-            compilation.setEvents(events);
+            compilation.getEvents().clear();
+            compilation.getEvents().addAll(events);
         }
         Compilation updatedCompilation = compilationRepository.save(compilation);
         return CompilationMapper.toCompilationDto(updatedCompilation,
@@ -87,8 +88,8 @@ public class CompilationService {
     }
 
     public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
-        List<Compilation> compilations = compilationRepository.getCompilations(pinned, from, size);
-        return compilations
+        return compilationRepository
+                .getCompilations(pinned, from, size)
                 .stream()
                 .map(c -> CompilationMapper.toCompilationDto(c,
                         eventService.getEventShortDto(c.getEvents())))

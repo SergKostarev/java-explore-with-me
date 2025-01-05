@@ -12,7 +12,10 @@ import ru.practicum.model.EndpointHitEntity;
 import utils.DateUtils;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,7 +64,7 @@ public class StatsService {
                 }
             }
         }
-        Collections.sort(vsList, Comparator.comparingLong(ViewStats::getHits).reversed());
+        vsList.sort(Comparator.comparingLong(ViewStats::getHits).reversed());
         return vsList;
     }
 

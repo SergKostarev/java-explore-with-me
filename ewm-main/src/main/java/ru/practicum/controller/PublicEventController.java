@@ -38,16 +38,14 @@ public class PublicEventController {
                                                     @RequestParam(defaultValue = "10") Integer size,
                                                     HttpServletRequest request) {
         sendHit(request);
-        List<EventShortDto> events = eventService.getEvents(
+        return eventService.getEvents(
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
-        return events;
     }
 
     @GetMapping(path = "/{id}")
     public EventFullDto getEvent(@PathVariable Long id, HttpServletRequest request) {
         sendHit(request);
-        EventFullDto event = eventService.getEvent(id);
-        return event;
+        return eventService.getEvent(id);
     }
 
     private void sendHit(HttpServletRequest request) {

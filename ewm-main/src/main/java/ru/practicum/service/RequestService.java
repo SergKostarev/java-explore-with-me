@@ -1,7 +1,6 @@
 package ru.practicum.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dao.EventRepository;
@@ -81,7 +80,7 @@ public class RequestService {
 
     public List<ParticipationRequestDto> getByRequesterId(long userId) {
         userService.getById(userId);
-        return requestRepository.findByRequesterId(userId, Sort.by("id"))
+        return requestRepository.findByRequesterId(userId)
                 .stream()
                 .map(RequestMapper::toParticipationRequestDto)
                 .toList();
@@ -110,7 +109,7 @@ public class RequestService {
     }
 
     public List<ParticipationRequestDto> getByEventId(long eventId) {
-        return requestRepository.findByEventId(eventId, Sort.by("id"))
+        return requestRepository.findByEventId(eventId)
                 .stream()
                 .map(RequestMapper::toParticipationRequestDto)
                 .toList();

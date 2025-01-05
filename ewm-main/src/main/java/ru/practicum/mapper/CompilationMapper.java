@@ -16,7 +16,7 @@ public class CompilationMapper {
         Compilation compilation = new Compilation();
         compilation.setPinned(newCompilationDto.getPinned());
         compilation.setTitle(newCompilationDto.getTitle());
-        compilation.setEvents(events);
+        compilation.getEvents().addAll(events);
         return compilation;
     }
 
