@@ -2,6 +2,7 @@ package ru.practicum;
 
 import dto.EndpointHit;
 import dto.ViewStats;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -16,13 +18,14 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import java.util.List;
 import java.util.Map;
 
+@Component
+@EnableConfigurationProperties(StatsServiceProperties.class)
 public class StatsClient {
 
     private final RestTemplate rest;
 
-    public StatsClient(String serverUrl) {
-        RestTemplateBuilder builder = new RestTemplateBuilder();
-        rest = builder.uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
+    public StatsClient(RestTemplateBuilder builder, StatsServiceProperties props) {
+        rest = builder.uriTemplateHandler(new DefaultUriBuilderFactory(props.url()))
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
                 .build();
     }

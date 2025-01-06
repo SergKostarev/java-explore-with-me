@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dao.CompilationRepository;
 import ru.practicum.dto.CompilationDto;
+import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewCompilationDto;
 import ru.practicum.dto.UpdateCompilationRequest;
 import ru.practicum.exception.DataIntegrityException;
@@ -13,9 +14,9 @@ import ru.practicum.mapper.CompilationMapper;
 import ru.practicum.model.Compilation;
 import ru.practicum.model.Event;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -88,12 +89,25 @@ public class CompilationService {
     }
 
     public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
-        return compilationRepository
-                .getCompilations(pinned, from, size)
+        List<Compilation> compilations = compilationRepository.getCompilations(pinned, from, size);
+        Set<Event> compilationEvents = compilations
                 .stream()
-                .map(c -> CompilationMapper.toCompilationDto(c,
-                        eventService.getEventShortDto(c.getEvents())))
-                .toList();
+                .map(Compilation::getEvents)
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet());
+        Map<Long, EventShortDto> eventShortDtoMap = eventService
+                .getEventShortDto(compilationEvents)
+                .stream()
+                .collect(Collectors.toMap(EventShortDto::getId, Function.identity()));
+        List<CompilationDto> compilationDtoList = new ArrayList<>();
+        for (Compilation c : compilations) {
+            List<EventShortDto> eventShortDto = c.getEvents()
+                    .stream()
+                    .map(e -> eventShortDtoMap.get(e.getId()))
+                    .toList();
+            compilationDtoList.add(CompilationMapper.toCompilationDto(c, eventShortDto));
+        }
+        return compilationDtoList;
     }
 
     public CompilationDto getCompilationsById(Long compId) {
