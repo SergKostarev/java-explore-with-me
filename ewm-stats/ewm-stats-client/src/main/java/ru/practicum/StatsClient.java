@@ -2,6 +2,7 @@ package ru.practicum;
 
 import dto.EndpointHit;
 import dto.ViewStats;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -16,13 +18,14 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import java.util.List;
 import java.util.Map;
 
+@Component
+@EnableConfigurationProperties(StatsServiceProperties.class)
 public class StatsClient {
 
     private final RestTemplate rest;
 
-    public StatsClient(String serverUrl) {
-        RestTemplateBuilder builder = new RestTemplateBuilder();
-        rest = builder.uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
+    public StatsClient(RestTemplateBuilder builder, StatsServiceProperties props) {
+        rest = builder.uriTemplateHandler(new DefaultUriBuilderFactory(props.url()))
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
                 .build();
     }
@@ -39,7 +42,7 @@ public class StatsClient {
         rest.exchange("/hit", HttpMethod.POST, requestEntity, Object.class);
     }
 
-    public List<ViewStats> getHits(String start, String end, String[] uris, boolean unique) throws RestClientResponseException {
+    public List<ViewStats> getStats(String start, String end, String[] uris, boolean unique) throws RestClientResponseException {
         Map<String, Object> parameters = Map.of(
                 "start", start,
                 "end", end,
@@ -48,7 +51,8 @@ public class StatsClient {
         );
         HttpEntity requestEntity = new HttpEntity<>(null, defaultHeaders());
         return rest
-                .exchange("/stats", HttpMethod.GET, requestEntity, new ParameterizedTypeReference<List<ViewStats>>(){}, parameters)
+                .exchange("/stats?start={start}&end={end}&uris={uris}&unique={unique}",
+                        HttpMethod.GET, requestEntity, new ParameterizedTypeReference<List<ViewStats>>(){}, parameters)
                 .getBody();
     }
 }

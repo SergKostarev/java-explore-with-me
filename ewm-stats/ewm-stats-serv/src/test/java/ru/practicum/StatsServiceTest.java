@@ -1,13 +1,13 @@
 package ru.practicum;
 
 import dto.ViewStats;
+import exception.IncorrectDateException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.practicum.handler.IncorrectDataException;
 import ru.practicum.service.StatsService;
 
 import java.util.List;
@@ -45,14 +45,14 @@ public class StatsServiceTest {
     void givenWrongStartDateFormatShouldThrowIncorrectDataException() {
         assertThatThrownBy(() -> {
             service.get("2022-09-01 1:00:23", "2022-09-30 11:00:23", new String[]{"/events/1"}, false);
-        }).isInstanceOf(IncorrectDataException.class);
+        }).isInstanceOf(IncorrectDateException.class);
     }
 
     @Test
     void givenStartDateBeforeEndDateShouldThrowIncorrectDataException() {
         assertThatThrownBy(() -> {
             service.get("2022-09-30 11:00:23", "2022-09-01 11:00:23", new String[]{"/events/1"}, false);
-        }).isInstanceOf(IncorrectDataException.class);
+        }).isInstanceOf(IncorrectDateException.class);
     }
 
 }

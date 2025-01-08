@@ -8,12 +8,12 @@ import java.util.List;
 
 
 public interface StatsRepository extends JpaRepository<EndpointHitEntity, Long> {
-    List<EndpointHitEntity> findByTimestampIsAfterAndTimestampIsBeforeAndUriIn(
+    List<EndpointHitEntity> findByTimestampIsGreaterThanEqualAndTimestampIsLessThanEqualAndUriIn(
             LocalDateTime start,
             LocalDateTime end,
             String[] uris);
 
-    List<EndpointHitEntity> findByTimestampIsAfterAndTimestampIsBefore(
+    List<EndpointHitEntity> findByTimestampIsGreaterThanEqualAndTimestampIsLessThanEqual(
             LocalDateTime start,
             LocalDateTime end);
 }
