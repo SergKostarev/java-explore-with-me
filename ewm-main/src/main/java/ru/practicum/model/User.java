@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Getter
 @Setter
 @Entity
@@ -16,5 +19,14 @@ public class User {
     private String email;
 
     private String name;
+
+    @JoinColumn(name = "allow_subscription")
+    private Boolean allowSubscription = true;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "subscriptions",
+            joinColumns = { @JoinColumn(name = "user_id") },
+            inverseJoinColumns = { @JoinColumn(name = "subscription_id")})
+    private Set<User> subscriptions = new HashSet<>();
 
 }

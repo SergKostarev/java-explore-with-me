@@ -1,0 +1,909 @@
+{
+	"info": {
+		"_postman_id": "bc4614b8-8a64-457b-b655-b4c7d658fbcd",
+		"name": "Test Explore With Me - Feature",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37566060"
+	},
+	"item": [
+		{
+			"name": "Запрет подписки на пользователя",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const uuid = require('uuid')\r",
+							"const postRequest = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"pm.sendRequest(postRequest, (error, response) => {\r",
+							"  console.log(error ? error : response.json());\r",
+							"  pm.collectionVariables.set(\"user_id\", response.json().id);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"const target = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Пользователь должен содержать поля: id, name, email, allowSubscription, subscriptions\", function () {\r",
+							"pm.expect(target).to.have.property('id');\r",
+							"pm.expect(target).to.have.property('name');\r",
+							"pm.expect(target).to.have.property('email');\r",
+							"pm.expect(target).to.have.property('allowSubscription');\r",
+							"pm.expect(target).to.have.property('subscriptions');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Возможность подписки должна быть запрещена\", function () {\r",
+							"    pm.expect(target.allowSubscription).equal(false);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{user_id}}/subscriptions?allow=false",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id}}",
+						"subscriptions"
+					],
+					"query": [
+						{
+							"key": "allow",
+							"value": "false"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Подписка на пользователя",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const uuid = require('uuid')\r",
+							"const postUserRequest1 = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"const postUserRequest2 = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"pm.sendRequest(postUserRequest1, (error, response) => {\r",
+							"  console.log(error ? error : response.json());\r",
+							"  pm.collectionVariables.set(\"user_id_1\", response.json().id);\r",
+							"  pm.sendRequest(postUserRequest2, function (error, response) {\r",
+							"    console.log(error ? error : response.json());\r",
+							"    pm.collectionVariables.set(\"user_id_2\", response.json().id);\r",
+							"  });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"const target = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Пользователь должен содержать поля: id, name, email, allowSubscription, subscriptions\", function () {\r",
+							"pm.expect(target).to.have.property('id');\r",
+							"pm.expect(target).to.have.property('name');\r",
+							"pm.expect(target).to.have.property('email');\r",
+							"pm.expect(target).to.have.property('allowSubscription');\r",
+							"pm.expect(target).to.have.property('subscriptions');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Первый пользователь должен иметь второго в подписках\", function () {\r",
+							"    pm.expect(target.subscriptions).to.have.length(1);\r",
+							"    pm.expect(target.subscriptions[0].id).to.eql(pm.collectionVariables.get(\"user_id_2\"));\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{user_id_1}}/subscriptions/{{user_id_2}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id_1}}",
+						"subscriptions",
+						"{{user_id_2}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Подписка на пользователя с запретом подписок",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const uuid = require('uuid')\r",
+							"const postUserRequest1 = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"const postUserRequest2 = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"pm.sendRequest(postUserRequest1, (error, response) => {\r",
+							"  console.log(error ? error : response.json());\r",
+							"  pm.collectionVariables.set(\"user_id_1\", response.json().id);\r",
+							"  pm.sendRequest(postUserRequest2, function (error, response) {\r",
+							"    console.log(error ? error : response.json());\r",
+							"    pm.collectionVariables.set(\"user_id_2\", response.json().id);\r",
+							"    const changeSubscriptionStatusRequest = {\r",
+							"    url: pm.collectionVariables.get('base_url')+'/users/'+pm.collectionVariables.get(\"user_id_2\")+'/subscriptions?allow=false',\r",
+							"    method: 'PATCH',\r",
+							"    header: {\r",
+							"        'Content-Type': 'application/json'\r",
+							"    }\r",
+							"    };\r",
+							"    pm.sendRequest(changeSubscriptionStatusRequest, function (error, response) {\r",
+							"      console.log(error ? error : response.json());\r",
+							"    });\r",
+							"  });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {\r",
+							"    pm.response.to.have.status(409);\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{user_id_1}}/subscriptions/{{user_id_2}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id_1}}",
+						"subscriptions",
+						"{{user_id_2}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Повторная подписка на пользователя",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const uuid = require('uuid')\r",
+							"const postUserRequest1 = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"const postUserRequest2 = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"pm.sendRequest(postUserRequest1, (error, response) => {\r",
+							"  console.log(error ? error : response.json());\r",
+							"  pm.collectionVariables.set(\"user_id_1\", response.json().id);\r",
+							"  pm.sendRequest(postUserRequest2, function (error, response) {\r",
+							"    console.log(error ? error : response.json());\r",
+							"    pm.collectionVariables.set(\"user_id_2\", response.json().id);\r",
+							"    const subscriptionRequest = {\r",
+							"    url: pm.collectionVariables.get('base_url')+'/users/'+pm.collectionVariables.get(\"user_id_1\")\r",
+							"    +'/subscriptions/'+pm.collectionVariables.get(\"user_id_2\"),\r",
+							"    method: 'PATCH',\r",
+							"    header: {\r",
+							"        'Content-Type': 'application/json'\r",
+							"    }\r",
+							"    };\r",
+							"    pm.sendRequest(subscriptionRequest, function (error, response) {\r",
+							"      console.log(error ? error : response.json());\r",
+							"    });\r",
+							"  });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 400 и данные в формате json\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{user_id_1}}/subscriptions/{{user_id_2}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id_1}}",
+						"subscriptions",
+						"{{user_id_2}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Подписка пользователя на себя",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const uuid = require('uuid')\r",
+							"const postUserRequest1 = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"pm.sendRequest(postUserRequest1, (error, response) => {\r",
+							"  console.log(error ? error : response.json());\r",
+							"  pm.collectionVariables.set(\"user_id_1\", response.json().id);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 400 и данные в формате json\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{user_id_1}}/subscriptions/{{user_id_1}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id_1}}",
+						"subscriptions",
+						"{{user_id_1}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Отмена подписки на пользователя",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const uuid = require('uuid')\r",
+							"const postUserRequest1 = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"const postUserRequest2 = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"pm.sendRequest(postUserRequest1, (error, response) => {\r",
+							"  console.log(error ? error : response.json());\r",
+							"  pm.collectionVariables.set(\"user_id_1\", response.json().id);\r",
+							"  pm.sendRequest(postUserRequest2, function (error, response) {\r",
+							"    console.log(error ? error : response.json());\r",
+							"    pm.collectionVariables.set(\"user_id_2\", response.json().id);\r",
+							"    const subscriptionRequest = {\r",
+							"    url: pm.collectionVariables.get('base_url')+'/users/'+pm.collectionVariables.get(\"user_id_1\")\r",
+							"    +'/subscriptions/'+pm.collectionVariables.get(\"user_id_2\"),\r",
+							"    method: 'PATCH',\r",
+							"    header: {\r",
+							"        'Content-Type': 'application/json'\r",
+							"    }\r",
+							"    };\r",
+							"    pm.sendRequest(subscriptionRequest, function (error, response) {\r",
+							"      console.log(error ? error : response.json());\r",
+							"      pm.collectionVariables.set('source', response.json());\r",
+							"    });\r",
+							"  });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"const target = pm.response.json();\r",
+							"const source = pm.collectionVariables.get('source');\r",
+							"\r",
+							"pm.test(\"Пользователь должен содержать поля: id, name, email, allowSubscription, subscriptions\", function () {\r",
+							"    pm.expect(target).to.have.property('id');\r",
+							"    pm.expect(target).to.have.property('name');\r",
+							"    pm.expect(target).to.have.property('email');\r",
+							"    pm.expect(target).to.have.property('allowSubscription');\r",
+							"    pm.expect(target).to.have.property('subscriptions');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Количество подписок первого пользователя должно уменьшиться на 1\", function () {\r",
+							"    pm.expect(target.subscriptions).to.have.length(source.subscriptions.length - 1);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{user_id_1}}/subscriptions/{{user_id_2}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id_1}}",
+						"subscriptions",
+						"{{user_id_2}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получить все подписки",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const uuid = require('uuid')\r",
+							"const postUserRequest1 = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"const postUserRequest2 = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"const postUserRequest3 = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"pm.sendRequest(postUserRequest1, (error, response) => {\r",
+							"  console.log(error ? error : response.json());\r",
+							"  pm.collectionVariables.set(\"user_id_1\", response.json().id);\r",
+							"  pm.sendRequest(postUserRequest2, function (error, response) {\r",
+							"    console.log(error ? error : response.json());\r",
+							"    pm.collectionVariables.set(\"user_id_2\", response.json().id);\r",
+							"    pm.sendRequest(postUserRequest3, function (error, response) {\r",
+							"        console.log(error ? error : response.json());\r",
+							"        pm.collectionVariables.set(\"user_id_3\", response.json().id);\r",
+							"        const subscriptionRequest2 = {\r",
+							"        url: pm.collectionVariables.get('base_url')+'/users/'+pm.collectionVariables.get(\"user_id_1\")\r",
+							"        +'/subscriptions/'+pm.collectionVariables.get(\"user_id_3\"),\r",
+							"        method: 'PATCH',\r",
+							"        header: {\r",
+							"            'Content-Type': 'application/json'\r",
+							"        }\r",
+							"        };\r",
+							"        const subscriptionRequest1 = {\r",
+							"        url: pm.collectionVariables.get('base_url')+'/users/'+pm.collectionVariables.get(\"user_id_1\")\r",
+							"        +'/subscriptions/'+pm.collectionVariables.get(\"user_id_2\"),\r",
+							"        method: 'PATCH',\r",
+							"        header: {\r",
+							"            'Content-Type': 'application/json'\r",
+							"        }\r",
+							"        };\r",
+							"        pm.sendRequest(subscriptionRequest1, function (error, response) {\r",
+							"            console.log(error ? error : response.json());\r",
+							"            pm.collectionVariables.set('source', response.json());\r",
+							"            pm.sendRequest(subscriptionRequest2, function (error, response) {\r",
+							"                console.log(error ? error : response.json());\r",
+							"                pm.collectionVariables.set('source', response.json());\r",
+							"            });\r",
+							"        });\r",
+							"    });\r",
+							"  });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"const target = pm.response.json();\r",
+							"const source = pm.collectionVariables.get('source');\r",
+							"\r",
+							"pm.test(\"Тело ответа должно быть массивом\", function () {\r",
+							"    pm.expect(target).is.an('array');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Количество подписок первого пользователя должно соответствовать количеству после последнего добавления подписки\", function () {\r",
+							"    pm.expect(target).to.have.length(source.subscriptions.length);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{user_id_1}}/subscriptions",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id_1}}",
+						"subscriptions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получить события подписок",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const uuid = require('uuid')\r",
+							"const postUserRequest1 = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"const postUserRequest2 = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/users',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({ \r",
+							"        email: uuid()+'@domain.com',\r",
+							"        name: \"Some user\" })\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"const categoryRequest = {\r",
+							"  url: pm.collectionVariables.get('base_url')+'/admin/categories',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json'\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: JSON.stringify({\"name\" : uuid()+'_category'})\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"pm.sendRequest(postUserRequest1, (error, response) => {\r",
+							"  console.log(error ? error : response.json());\r",
+							"  pm.collectionVariables.set(\"user_id_1\", response.json().id);\r",
+							"  pm.sendRequest(postUserRequest2, function (error, response) {\r",
+							"    console.log(error ? error : response.json());\r",
+							"    pm.collectionVariables.set(\"user_id_2\", response.json().id);\r",
+							"    pm.sendRequest(categoryRequest, function (error, response) {\r",
+							"        console.log(error ? error : response.json());\r",
+							"        pm.collectionVariables.set(\"category_id\", response.json().id);\r",
+							"        const eventRequest = {\r",
+							"        url: pm.collectionVariables.get('base_url')+'/users/'+pm.collectionVariables.get(\"user_id_2\")+'/events',\r",
+							"        method: 'POST',\r",
+							"        header: {\r",
+							"            'Content-Type': 'application/json'\r",
+							"        },\r",
+							"        body: {\r",
+							"            mode: 'raw',\r",
+							"            raw: JSON.stringify({\"annotation\":\"Some annotation for event.\",\"category\":pm.collectionVariables.get(\"category_id\"),\"description\":\"Some long description for event.\",\"eventDate\":\"2025-01-11 17:05:32\",\"location\":{\"lat\":-33.5425,\"lon\":-167.5879},\"paid\":\"false\",\"participantLimit\":\"623\",\"requestModeration\":\"true\",\"title\":\"Some title.\"})\r",
+							"        }\r",
+							"        };\r",
+							"        pm.sendRequest(eventRequest, function (error, response) {\r",
+							"            pm.collectionVariables.set(\"event_id_1\", response.json().id);\r",
+							"            console.log(error ? error : response.json());\r",
+							"            pm.sendRequest(eventRequest, function (error, response) {\r",
+							"                pm.collectionVariables.set(\"event_id_2\", response.json().id);\r",
+							"                console.log(error ? error : response.json());\r",
+							"                const eventPublishingRequest1 = {\r",
+							"                    url: pm.collectionVariables.get('base_url')+'/admin/events/'+pm.collectionVariables.get(\"event_id_1\"),\r",
+							"                    method: 'PATCH',\r",
+							"                    header: {\r",
+							"                        'Content-Type': 'application/json'\r",
+							"                    },\r",
+							"                    body: {\r",
+							"                        mode: 'raw',\r",
+							"                        raw: JSON.stringify({\"stateAction\" : \"PUBLISH_EVENT\"})\r",
+							"                    }\r",
+							"                };\r",
+							"                const eventPublishingRequest2 = {\r",
+							"                    url: pm.collectionVariables.get('base_url')+'/admin/events/'+pm.collectionVariables.get(\"event_id_2\"),\r",
+							"                    method: 'PATCH',\r",
+							"                    header: {\r",
+							"                        'Content-Type': 'application/json'\r",
+							"                    },\r",
+							"                    body: {\r",
+							"                        mode: 'raw',\r",
+							"                        raw: JSON.stringify({\"stateAction\" : \"PUBLISH_EVENT\"})\r",
+							"                    }\r",
+							"                };\r",
+							"                const subscriptionRequest = {\r",
+							"                url: pm.collectionVariables.get('base_url')+'/users/'\r",
+							"                +pm.collectionVariables.get(\"user_id_1\")+'/subscriptions/'+pm.collectionVariables.get(\"user_id_2\"),\r",
+							"                method: 'PATCH',\r",
+							"                header: {\r",
+							"                    'Content-Type': 'application/json'\r",
+							"                }\r",
+							"                };\r",
+							"                pm.sendRequest(eventPublishingRequest1, function (error, response) {\r",
+							"                    console.log(error ? error : response.json());\r",
+							"                });\r",
+							"                pm.sendRequest(eventPublishingRequest2, function (error, response) {\r",
+							"                    console.log(error ? error : response.json());\r",
+							"                });\r",
+							"                pm.sendRequest(subscriptionRequest, function (error, response) {\r",
+							"                    console.log(error ? error : response.json());\r",
+							"                });\r",
+							"            });\r",
+							"        });\r",
+							"    });\r",
+							"  });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"const target = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Тело ответа должно быть массивом\", function () {\r",
+							"    pm.expect(target).is.an('array');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"В ответе должно быть 2 события\", function () {\r",
+							"    pm.expect(target).to.have.length(2);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{user_id_1}}/subscriptions/events",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id_1}}",
+						"subscriptions",
+						"events"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "user_id",
+			"value": ""
+		},
+		{
+			"key": "user_id_1",
+			"value": ""
+		},
+		{
+			"key": "user_id_2",
+			"value": ""
+		},
+		{
+			"key": "source",
+			"value": ""
+		},
+		{
+			"key": "user_id_3",
+			"value": ""
+		},
+		{
+			"key": "base_url",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "category_id",
+			"value": ""
+		},
+		{
+			"key": "event_id_1",
+			"value": ""
+		},
+		{
+			"key": "event_id_2",
+			"value": ""
+		}
+	]
+}

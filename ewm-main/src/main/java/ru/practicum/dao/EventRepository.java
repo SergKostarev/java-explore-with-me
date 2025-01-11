@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.model.Event;
+import ru.practicum.model.EventState;
 
 import java.util.List;
 
@@ -14,5 +15,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
     List<Event> findByInitiatorId(long initiatorId, int from, int size);
 
     List<Event> findByCategoryId(long categoryId);
+
+    List<Event> findByInitiatorIdInAndState(List<Long> initiatorIds, EventState state);
 
 }
