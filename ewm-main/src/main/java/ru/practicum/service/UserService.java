@@ -16,27 +16,28 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository userRepository;
 
+    @Transactional
     public UserDto post(NewUserRequest newUserRequest) {
         String email = newUserRequest.getEmail();
         boolean emailExists = userRepository.findByEmailIgnoreCase(email).isPresent();
         if (emailExists) {
             throw new DataIntegrityException(String.format("Email %s already exists.", email), email);
         }
-        User savedUser = userRepository.save(UserMapper.toUser(newUserRequest));
-        return UserMapper.toUserDto(savedUser);
+        return UserMapper.toUserDto(
+                saveUser(UserMapper.toUser(newUserRequest)));
     }
 
+    @Transactional
     public void delete(long id) {
         User user = getById(id);
         userRepository.delete(user);
     }
 
-    @Transactional(readOnly = true)
     public List<UserDto> get(List<Long> ids, int from, int size) {
         List<User> users;
         if (ids == null || ids.isEmpty()) {
@@ -49,12 +50,15 @@ public class UserService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public User getById(long id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
             throw new NotFoundException(String.format("User with id=%d was not found.", id), id);
         }
         return user.get();
+    }
+
+    public User saveUser(User user) {
+        return userRepository.save(user);
     }
 }
