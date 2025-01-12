@@ -20,7 +20,6 @@ public class User {
 
     private String name;
 
-    @JoinColumn(name = "allow_subscription")
     private Boolean allowSubscription = true;
 
     @ManyToMany(fetch = FetchType.EAGER)
