@@ -371,6 +371,10 @@ public class EventService {
         }
     }
 
+    public List<EventShortDto> getPublishedEventsDtoByUserId(List<Long> initiatorIds) {
+        return getEventShortDto(eventRepository.findByInitiatorIdInAndState(initiatorIds, PUBLISHED));
+    }
+
     private Specification<Event> processDates(Specification<Event> spec, String rangeStart, String rangeEnd) {
         LocalDateTime start = rangeStart == null ? null : DateUtils.convertToDate(rangeStart);
         LocalDateTime end = rangeEnd == null ? null : DateUtils.convertToDate(rangeEnd);
