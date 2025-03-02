@@ -1,3 +1,2 @@
-# java-explore-with-me
-Template repository for ExploreWithMe project.
-https://github.com/SergKostarev/java-explore-with-me/pull/3
+# Дипломный проект на курсе Java-Разработчик Яндекс Практикума.
+Приложение ExploreWithMe, позволяющее пользователям делиться информацией об интересных событиях и находить компанию для участия в них. 
